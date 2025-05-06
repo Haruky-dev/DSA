@@ -17,8 +17,8 @@ Feel free to browse the code and use it for your learning or reference. Each imp
 # C++
 1/ Download the header/file (using curl, you may use 'wget')
 ```bash
-curl -O https://raw.githubusercontent.com/Haruky-dev/DSA/main/header.h
-curl -O https://raw.githubusercontent.com/Haruky-dev/DSA/main/file.h
+curl -O https://raw.githubusercontent.com/Haruky-dev/DSA/main/cpp/header.h
+curl -O https://raw.githubusercontent.com/Haruky-dev/DSA/main/cpp/file.cpp
 ```
 2/ Import and compile (using g++ compiler, you may update it accordingly)
 ```C++
