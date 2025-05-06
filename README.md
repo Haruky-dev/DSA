@@ -26,8 +26,21 @@ curl -O https://raw.githubusercontent.com/Haruky-dev/DSA/main/cpp/file.cpp
 
 g++ main.cpp file.cpp -o app
 ```
+# Python
+1/ Download the file
+```bash
+curl -O https://raw.githubusercontent.com/HarukyDev/DSA-Structures/main/python/file.py
+```
+- Or clone into it using git
+```bash
+git clone https://github.com/Haruky-dev/DSA/python
+cd python
+```
 
-
+2/ Import it to your project
+```Python
+import file.py
+```
 
 ## Contributing
 
