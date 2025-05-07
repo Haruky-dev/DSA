@@ -31,7 +31,7 @@ g++ main.cpp file.cpp -o app
 ```bash
 curl -O https://raw.githubusercontent.com/HarukyDev/DSA-Structures/main/python/file.py
 ```
-Goot to go!
+## Good to go!
 
 2/ Import it to your project
 ```Python
