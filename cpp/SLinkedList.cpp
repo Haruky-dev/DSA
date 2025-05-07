@@ -1,4 +1,4 @@
-#include "../Headers/SLinkedList.hpp"
+#include "SLinkedList.hpp" // Path to header
 #include <ctime>
 #include <cstdlib>
 #include <iostream>
