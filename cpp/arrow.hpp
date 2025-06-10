@@ -4,11 +4,11 @@
 
 template <typename T>
 
-class arrow {
+class Arrow {
     private:
         int size_;
         int capacity_;
-        const int Factor = 2;
+        const double Factor = 1.5;
         T* arr = nullptr;
 
         void resize() {
@@ -32,10 +32,19 @@ class arrow {
 
     public:
         // Constructor
-        arrow(int S = 0) : size_(0) {
+        Arrow(int S = 0) : size_(0) {
             capacity_ = (S <= 0)? 1 : S;
             arr = new T[capacity_]{};
         }
+
+        // Copy Constructor
+        Arrow(const Arrow<T>& original) {
+            size_ = original.size_;
+            capacity_ = original.capacity_;
+            for (int i = 0; i<size_; i++)
+                arr[i] = original.arr[i];
+        }
+
     // Infos
 
         /* Returns Number of elements in arrow. */
@@ -62,7 +71,7 @@ class arrow {
         /* Delete Allocated memory. By moving elements to a new Fit home.,*/
         void shrink() {
             // Already shrinked.
-            if (capacity_ == size_) return;
+            if ((capacity_ == size_) || (!size_)) return;
 
             T* newArr = new T[size_]{};
             std::move(arr, arr+size_, newArr);
@@ -75,6 +84,10 @@ class arrow {
         void reserve(int amount) {
             if (amount <= 0) return;
 
+            T* newArr = new T[capacity_ + amount];
+            std::move(arr, arr+size_, newArr);
+            delete[] arr;
+            arr = newArr;
             capacity_ += amount;
         }
 
@@ -177,8 +190,8 @@ class arrow {
                 size_--;
         }
 
-        // Operators
-        friend std::ostream& operator<<(std::ostream& os, arrow<T>& v) {
+    // Operators
+        friend std::ostream& operator<<(std::ostream& os, Arrow<T>& v) {
             // Empty arrow. 
             if (v.empty()) {
                 os << "[]\n";
@@ -216,6 +229,21 @@ class arrow {
                 throw std::out_of_range("Invalid given index.");
         }
 
+        // Copy assignment operator.
+        Arrow& operator=(const Arrow& original) {
+            if (this == &original) return *this;
+
+            delete[] arr;
+            arr = new T[original.capacity_];
+            size_ = original.size_;
+            capacity_ = original.capacity_;
+
+            for (int i = 0; i<original.size_; ++i)
+                arr[i] = original.arr[i];
+
+            return *this;
+        }
+
     /* Destoryer. */
-    ~arrow() { delete[] arr; }
+    ~Arrow() { delete[] arr; }
 };
