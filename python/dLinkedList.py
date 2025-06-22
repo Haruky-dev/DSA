@@ -167,10 +167,8 @@ class LinkedList:
 
             curr.prev.next = curr.next
             if curr.next:
-                print(0)
                 curr.next.prev = curr.prev
             else:
-                print(1)
                 self.__tail = curr.prev
 
             del curr
