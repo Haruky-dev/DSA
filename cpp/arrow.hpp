@@ -106,7 +106,7 @@ class Arrow {
         /* Pre-allocate a range of memory corresponding to a given amount. */
         void reserve(const size_t& amount) {
             // Already have enough space
-            if (amount <= capacity_ amount) return;
+            if (amount <= capacity_ - size_) return;
 
             // reserve the given amount of space
             capacity_ = size_+amount;
