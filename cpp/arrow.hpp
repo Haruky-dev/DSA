@@ -13,7 +13,7 @@ class Arrow {
     private:
         size_t size_;
         size_t capacity_;
-        const double FACTOR = 1.5;
+        constexpr double FACTOR = 1.5;
         unique_ptr<T[]> arr;
 
         void resize() {
@@ -186,6 +186,9 @@ class Arrow {
                 arr[i] = move(arr[i+1]);
 
             size_--;
+        }
+        void resize() {
+            for (size_t i = 0; i<size_/2; ++i) std::swap(arr[i], arr[size_-1-i);
         }
 
     // Operators
