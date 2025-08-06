@@ -187,7 +187,7 @@ class Arrow {
 
             size_--;
         }
-        void resize() {
+        void reverse() {
             for (size_t i = 0; i<size_/2; ++i) std::swap(arr[i], arr[size_-1-i);
         }
 
