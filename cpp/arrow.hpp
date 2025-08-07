@@ -70,11 +70,26 @@ class Arrow {
         size_t capacity() const { return capacity_; }
 
         /* Returns index of first occurence of a target. Returns -1 otherwise. */
-        int find(const T target, const bool& sorted = 0) const {
-            // Linear search assuming the arrow isn't sorted.
-            for (int i = 0; i<size_; i++)
-                if (arr[i] == target)
-                    return i;
+        int find(const T& target, const bool& sorted = 0) const {
+            // Binary search
+            if (sorted) {
+                size_t L, R, mid_point;
+                while (L<=R) {
+                    mid_point = (L+R)/2;
+                    if (arr[mid_point] == target) return mid_point;
+
+                    else if (arr[mid_point] > target) R = mid_point-1;
+
+                    else if (arr[mid_point] < target) L = mid_point+1;
+                }
+            }
+                
+            // Linear search.
+            else {
+                for (int i = 0; i<size_; i++)
+                    if (arr[i] == target)
+                        return i;
+            }
             
             return -1;
         }
