@@ -5,7 +5,12 @@
 #include <algorithm>
 #include <initializer_list>
 
+#include <optional>
+
+#define FACTOR 1.5f
+
 using std::unique_ptr, std::make_unique, std::copy, std::move;
+
 
 template <typename T>
 
@@ -13,7 +18,7 @@ class Arrow {
     private:
         size_t size_;
         size_t capacity_;
-        constexpr double FACTOR = 1.5;
+        // constexpr double FACTOR = 1.5;
         unique_ptr<T[]> arr;
 
         void resize() {
@@ -45,9 +50,25 @@ class Arrow {
             capacity_ = original.capacity_;
         }
 
+        // Copy Constructor from Iterators
+        template <typename Iter>
+        Arrow(const std::pair<Iter, Iter> __it) {
+            const size_t len = std::distance(__it.first, __it.second);
+
+            if ( !len ) {
+                arr = make_unique<T[]>(1);
+                this->size_ = 0;
+                this->capacity_ = 1;
+            } else {
+                this->capacity_ = (int) ((this->size_ = len)*FACTOR);
+                arr = make_unique<T[]>(capacity_);
+                std::copy(__it.first, __it.second, arr.get());
+            }
+        }
+
         // Initialization Cosntructor
         Arrow(std::initializer_list<T> init) : arr(make_unique<T[]>(init.size())), size_(init.size()), capacity_(init.size()) {
-            copy(init.begin(), init.end(), arr.get());
+            std::copy(init.begin(), init.end(), arr.get());
         }
 
         /* Destructor. */
@@ -58,38 +79,39 @@ class Arrow {
         T* begin() { return arr.get(); }
         T* end() { return arr.get()+size_; }
 
-        const T* begin() const { return arr.get(); }
-        const T* end() const { return arr.get()+size_; }
+        const T* cbegin() const { return arr.get(); }
+        const T* cend() const { return arr.get()+size_; }
 
     // Infos
 
         /* Returns Number of elements in arrow. */
-        size_t size() const { return size_; }
+        const size_t size() const { return size_; }
 
         /* Returns the maximum possible size of arrow before being resized. */
-        size_t capacity() const { return capacity_; }
+        const size_t capacity() const { return capacity_; }
 
         /* Returns index of first occurence of a target. Returns -1 otherwise. */
         int find(const T& target, const bool& sorted = 0) const {
-            // Binary search
+            // Linear search assuming the arrow isn't sorted.
             if (sorted) {
                 size_t L, R, mid_point;
-                while (L<=R) {
-                    mid_point = (L+R)/2;
+                L = 0, R = size_-1;
+
+                while (L <= R) {
+                mid_point = (L+R)/2;
                     if (arr[mid_point] == target) return mid_point;
 
-                    else if (arr[mid_point] > target) R = mid_point-1;
+                    else if (arr[mid_point] > target)
+                        R = mid_point-1;
 
-                    else if (arr[mid_point] < target) L = mid_point+1;
+                    else if (arr[mid_point] < target)
+                        L = mid_point+1;
                 }
             }
-                
-            // Linear search.
-            else {
+            else
                 for (int i = 0; i<size_; i++)
                     if (arr[i] == target)
                         return i;
-            }
             
             return -1;
         }
@@ -142,20 +164,20 @@ class Arrow {
     // Modification
 
         /* Add new Last element to arrow. */
-        void append(const T& value, bool log = 0) {
+        void push_back(const T& value, bool log = 0) {
             if (size_ >= capacity_) this->resize();
 
             arr[size_++] = value;
         }
 
-        /* Insert an element at a given index in range [0, size). NO-OP if index>size or index<0 */
+        /* Insert an element at a given index in range [0, size]. NO-OP if index>size or index<0 */
         void insert(const T& value, int index) {
             if ((index > size_) || (index < 0))
                 throw std::out_of_range("Given Index is Out of range!");
 
             // Insertion in the end == appending
             if (index == size_) {
-                this->append(value);
+                this->push_back(value);
                 return;
             }
 
@@ -170,43 +192,41 @@ class Arrow {
             size_++;
         }
 
-        /* Remove element at given index. Default = Remvove Last. */
-        void pop(int index = -1) {  
+        /* Remove the last element of the Arrow */
+        void pop_back() { if (size_) size_--; }
+        
+        /* Remove element at given index. Supports in-range (-1 up to this->size()) Negative indecies. */
+        void pop_at(int index) {  
             // Empty arr. NO-OP
-            if (this->empty()) throw std::range_error("Empty arrow!");
-            
-            // Relying on a default value -> pop last element
-                // or size
-            if (index == -1) { index = size_-1; }
-
-            // Negative index
-            if (index < 0)
-                throw std::invalid_argument("Invalid index has given.");
-
-            // Removing last
-            else if (index == size_-1) {
-                // No actual removing in this case just considering a new end.
-                size_--;
-                return;
+            if (this->empty())
+                throw std::range_error("Empty arrow!");
+    
+            if ( index < 0 ) {
+                index += this->size_;
+                if (index < 0)
+                    throw std::range_error("Empyt arrow!");
             }
 
-            // Removing the only element in arrow
-            else if (size_ == 1){
-                this->clear();
-                return;
-            }
+            if ( index >= size_ )
+                throw std::out_of_range("Index Out of Range!");
 
-            // left-shift elements, overrite the value to pop.
             for (int i = index; i<size_-1; i++)
                 arr[i] = move(arr[i+1]);
 
             size_--;
         }
-        void reverse() {
-            for (size_t i = 0; i<size_/2; ++i) std::swap(arr[i], arr[size_-1-i);
-        }
 
+        void reverse() {
+            for (size_t i = 0; i<size_/2; i++) {
+                T temp = arr[i];
+                arr[i] = arr[size_-1-i];
+                arr[size_-1-i] = temp;
+            }
+        }
+    
     // Operators
+
+
         friend std::ostream& operator<<(std::ostream& os, const Arrow<T>& v) {
             // Empty arrow. 
             if (v.empty()) {
@@ -225,11 +245,11 @@ class Arrow {
         }
 
         /* Return READ-ONLY value stored at given index. Also suports in-range negative index, -1 starting from last to first */
-        const T& operator[](const int& index) const {
+        constexpr T& operator[](const int& index) const {
             // Support cycle indexing.
             if (index < 0) {
                 // Valid negative index.
-                if (-1*index <= size_)
+                if (static_cast<size_t>(-1*index) <= size_)
                     return arr[size_+index];
 
                 // Out of boundaries index.
@@ -238,7 +258,7 @@ class Arrow {
             }
 
             // Normale case indexing.
-            if (index < size_)
+            if (static_cast<size_t>(index) < size_)
                 return arr[index];
                 // return *(arr+index);
 
@@ -279,6 +299,26 @@ class Arrow {
                 copy(original.arr.get(), original.arr.get() + original.size_, arr.get());
                 size_ = original.size_;
                 capacity_ = original.capacity_;
+            }
+
+            return *this;
+        }   
+
+        // copy assignement operator, from iterators - Following STL compability
+        template <typename Iter>
+        Arrow& operator= ( const std::pair<Iter, Iter>& __it ) {
+
+            const size_t length = std::distance(__it.first, __it.second);
+
+            if (!length) {
+                arr.release();
+            } else {
+                unique_ptr<T[]> hold = make_unique<T[]>(length);
+                copy(__it.first, __it.second, hold.get());
+
+                arr = move(hold);
+
+                this->size_ = this->capacity_ = length;
             }
 
             return *this;
